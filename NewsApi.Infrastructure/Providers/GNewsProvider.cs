@@ -12,9 +12,7 @@ public class GNewsProvider : IExternalApiProvider
     private readonly HttpClient _httpClient;
     private readonly GNewsOptions _options;
 
-    public GNewsProvider(
-        HttpClient httpClient,
-        IOptions<GNewsOptions> options)
+    public GNewsProvider(HttpClient httpClient,IOptions<GNewsOptions> options)
     {
         _httpClient = httpClient;
         _options = options.Value;
@@ -22,53 +20,38 @@ public class GNewsProvider : IExternalApiProvider
 
     public string Name => "GNews";
 
-    public async Task<IEnumerable<FeedItem>> FetchAsync(
-        string query,
-        CancellationToken cancellationToken)
+    public async Task<IEnumerable<FeedItem>> FetchAsync(string query, CancellationToken cancellationToken)
     {
-        var url = new Uri(
-            new Uri(_options.BaseUrl),
-            $"search?q={Uri.EscapeDataString(query)}" +
-            $"&lang=en&max=10&apikey={Uri.EscapeDataString(_options.ApiKey)}");
+        var url = new Uri( new Uri(_options.BaseUrl), $"search?q={Uri.EscapeDataString(query)}" + $"&lang=en&max=10&apikey={Uri.EscapeDataString(_options.ApiKey)}");
 
-        using var response = await _httpClient.GetAsync(
-            url,
-            cancellationToken);
+        using var response = await _httpClient.GetAsync(url, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
-            var errorBody = await response.Content.ReadAsStringAsync(
-                cancellationToken);
+            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            throw new HttpRequestException(
-                $"GNews returned {(int)response.StatusCode}: {errorBody}");
+            throw new HttpRequestException($"GNews returned {(int)response.StatusCode}: {errorBody}");
         }
 
-        var result = await response.Content.ReadFromJsonAsync<GNewsApiResponse>(
-            cancellationToken: cancellationToken);
+        var result = await response.Content.ReadFromJsonAsync<GNewsApiResponse>(cancellationToken: cancellationToken);
 
         if (result is null)
         {
-            throw new InvalidOperationException(
-                "GNews returned an empty response.");
+            throw new InvalidOperationException( "GNews returned an empty response.");
         }
 
-        var articles = result.Articles ?? [];
+        var items = result.Articles ?? [];
 
-        return articles
-            .Where(article => !string.IsNullOrWhiteSpace(article.Title))
-            .Select(article => new FeedItem
+        return items.Where(item => !string.IsNullOrWhiteSpace(item.Title)).Select(item => new FeedItem
             {
-                Id = $"gnews-{article.Url}",
+                Id = $"gnews-{item.Url}",
                 Provider = Name,
-                Title = article.Title!,
-                Description = article.Description ?? string.Empty,
-                Url = article.Url,
-                PublishedAt = article.PublishedAt?.UtcDateTime
-                    ?? DateTime.UtcNow,
+                Title = item.Title!,
+                Description = item.Description ?? string.Empty,
+                Url = item.Url,
+                PublishedAt = item.PublishedAt?.UtcDateTime ?? DateTime.UtcNow,
                 Category = "News"
-            })
-            .ToList();
+            }).ToList();
     }
 
     private sealed class GNewsApiResponse

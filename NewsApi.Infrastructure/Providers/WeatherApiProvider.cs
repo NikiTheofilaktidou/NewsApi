@@ -21,11 +21,9 @@ namespace NewsApi.Infrastructure.Providers
         public async Task<IEnumerable<FeedItem>> FetchAsync(string query, CancellationToken cancellationToken)
         {
             var url = new Uri(new Uri(_options.BaseUrl),$"weather?q={Uri.EscapeDataString(query)}&appid={_options.ApiKey}&units=metric");
-
             using var response = await _httpClient.GetAsync(url, cancellationToken);
 
             response.EnsureSuccessStatusCode();
-
             var result = await response.Content.ReadFromJsonAsync<WeatherApiResponse>(cancellationToken: cancellationToken);
 
             if (result is null)

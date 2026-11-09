@@ -51,15 +51,13 @@ namespace NewsApi.Infrastructure.Providers
 
             var articles = result.Articles ?? [];
 
-            var feedItems = articles
-                .Where(article => !string.IsNullOrWhiteSpace(article.Title))
-                .Select(article => new FeedItem
+            var feedItems = articles.Where(item => !string.IsNullOrWhiteSpace(item.Title)).Select(item => new FeedItem
                 {
                     Provider = Name,
-                    Title = article.Title!,
-                    Description = article.Description ?? article.Content ?? string.Empty,
-                    Url = article.Url,
-                    PublishedAt = article.PublishedAt?.UtcDateTime ?? DateTime.UtcNow,
+                    Title = item.Title!,
+                    Description = item.Description ?? item.Content ?? string.Empty,
+                    Url = item.Url,
+                    PublishedAt = item.PublishedAt?.UtcDateTime ?? DateTime.UtcNow,
                     Category = "News"
                 }).ToList();
 

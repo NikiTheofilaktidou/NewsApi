@@ -39,6 +39,60 @@ Replace the placeholders with your own API keys. Do not commit actual API keys t
 
 Base URLs are configured in `appsettings.json`.
 
+## Authentication
+
+The API uses JWT Bearer authentication to protect its endpoints.
+
+### JWT Configuration
+
+Configure the JWT credentials using .NET User Secrets:
+
+```bash
+dotnet user-secrets set "Jwt:Username" "admin" --project NewsApi
+dotnet user-secrets set "Jwt:Password" "YOUR-PASSWORD" --project NewsApi
+dotnet user-secrets set "Jwt:Key" "YOUR-KEY" --project NewsApi
+```
+
+The JWT issuer and audience are already configured in `appsettings.json`.
+
+Replace the placeholders with your own values. The signing key should be a long, randomly generated secret. Never commit credentials or signing keys to source control.
+
+### Obtaining an Access Token
+
+Send a POST request to:
+
+`http://localhost:5007/api/v1/auth/token`
+
+With the JSON body:
+
+```json
+{
+  "username": "api-admin",
+  "password": "YOUR_STRONG_PASSWORD"
+}
+```
+
+The response contains an `accessToken`.
+
+### Using the Access Token
+
+Protected endpoints require JWT Bearer authentication.
+
+Include the token in the Authorization header:
+
+```text
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+The access token expires after one hour.
+
+### Protected Endpoints
+
+- `GET /api/v1/feed`
+- `GET /api/v1/ProviderStatistics`
+
+
+
 ## Running the Application
 
 ```bash
