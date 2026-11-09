@@ -35,7 +35,7 @@ dotnet user-secrets set "GNews:ApiKey" "YOUR_GNEWS_KEY" --project NewsApi
 dotnet user-secrets set "WeatherApi:ApiKey" "YOUR_OPENWEATHERMAP_KEY" --project NewsApi
 ```
 
-Replace the placeholders with your own API keys. Do not commit actual API keys to source control.
+To run the application locally with live external data, provide valid API keys for the three providers.
 
 Base URLs are configured in `appsettings.json`.
 
