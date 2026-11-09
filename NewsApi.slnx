@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="NewsApi.Application/NewsApi.Application.csproj" />
+  <Project Path="NewsApi.Domain/NewsApi.Domain.csproj" />
+  <Project Path="NewsApi.Infrastructure/NewsApi.Infrastructure.csproj" />
+  <Project Path="NewsApi.IntegrationTests/NewsApi.IntegrationTests.csproj" />
+  <Project Path="NewsApi.UnitTests/NewsApi.UnitTests.csproj" />
+  <Project Path="NewsApi/NewsApi.csproj" />
+</Solution>
