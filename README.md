@@ -49,13 +49,13 @@ Configure the JWT credentials using .NET User Secrets:
 
 ```bash
 dotnet user-secrets set "Jwt:Username" "admin" --project NewsApi
-dotnet user-secrets set "Jwt:Password" "YOUR-PASSWORD" --project NewsApi
-dotnet user-secrets set "Jwt:Key" "YOUR-KEY" --project NewsApi
+dotnet user-secrets set "Jwt:Password" "YOUR_PASSWORD" --project NewsApi
+dotnet user-secrets set "Jwt:Key" "YOUR_KEY" --project NewsApi
 ```
 
 The JWT issuer and audience are already configured in `appsettings.json`.
 
-Replace the placeholders with your own values. The signing key should be a long, randomly generated secret. Never commit credentials or signing keys to source control.
+Replace the placeholders with your existing values. The signing key should be a long, randomly generated secret. Never commit credentials or signing keys to source control.
 
 ### Obtaining an Access Token
 
@@ -63,12 +63,12 @@ Send a POST request to:
 
 `http://localhost:5007/api/v1/auth/token`
 
-With the JSON body:
+With the following JSON body:
 
 ```json
 {
-  "username": "api-admin",
-  "password": "YOUR_STRONG_PASSWORD"
+  "username": "admin",
+  "password": "YOUR_PASSWORD"
 }
 ```
 
@@ -90,8 +90,6 @@ The access token expires after one hour.
 
 - `GET /api/v1/feed`
 - `GET /api/v1/ProviderStatistics`
-
-
 
 ## Running the Application
 
