@@ -22,9 +22,7 @@ public class FeedController : ControllerBase
     {
         try
         {
-            var feedItems = await _feedService.GetFeedAsync(
-                request,
-                cancellationToken);
+            var feedItems = await _feedService.GetFeedAsync( request, cancellationToken);
 
             return Ok(feedItems);
         }

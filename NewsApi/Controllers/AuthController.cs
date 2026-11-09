@@ -39,10 +39,7 @@ public class AuthController : ControllerBase
             key,
             SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
-            issuer: jwtSettings["Issuer"],
-            audience: jwtSettings["Audience"],
-            claims:
+        var token = new JwtSecurityToken(issuer: jwtSettings["Issuer"], audience: jwtSettings["Audience"], claims:
             [
                 new Claim(ClaimTypes.Name, request.Username)
             ],
