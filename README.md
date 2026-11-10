@@ -116,6 +116,47 @@ Example:
 
 `GET /api/v1/feed?query=Athens&category=News&sortBy=date&descending=true`
 
+
+### Example Response
+
+A successful `GET /api/v1/feed` request returns a JSON array of feed items:
+
+```json
+[
+  {
+    "id": "7ff98bd0-a278-4c7c-8df4-d2567e8bca5f",
+    "provider": "OpenWeatherMap",
+    "title": "Weather in Athens",
+    "description": "few clouds. Temperature: 17,91°C",
+    "url": null,
+    "publishedAt": "2026-11-10T16:15:21.7732541Z",
+    "category": "Weather"
+  },
+  {
+    "id": "gnews-example",
+    "provider": "GNews",
+    "title": "Example news title",
+    "description": "Example news description.",
+    "url": "https://example.com/article",
+    "publishedAt": "2026-11-10T15:30:00Z",
+    "category": "News"
+  }
+]
+```
+
+**Response fields:**
+
+- `id`: Unique identifier for the feed item.
+- `provider`: Source of the item (NewsAPI, GNews, or OpenWeatherMap).
+- `title`: Title of the news article or weather report.
+- `description`: Short description or weather information.
+- `url`: Link to the original article; can be `null` for weather items.
+- `publishedAt`: Publication or retrieval timestamp.
+- `category`: Item category, such as `News` or `Weather`.
+
+**Note:** The response may contain different items depending on the search query and the available providers.
+
+
 ### Provider Statistics
 
 `GET /api/v1/ProviderStatistics`
