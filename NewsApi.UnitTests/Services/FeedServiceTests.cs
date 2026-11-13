@@ -227,6 +227,8 @@ namespace NewsApi.UnitTests.Services
             private readonly bool _shouldFail;
             public int CallCount { get; private set; }
 
+            public IEnumerable<string> Categories => ["News"];
+
             public FakeExternalApiProvider(string name, IEnumerable<FeedItem> feedItems, bool shouldFail = false)
             {
                 Name = name;
