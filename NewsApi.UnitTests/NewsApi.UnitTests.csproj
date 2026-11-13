@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NewsApi.Application\NewsApi.Application.csproj" />
     <ProjectReference Include="..\NewsApi.Domain\NewsApi.Domain.csproj" />
+    <ProjectReference Include="..\NewsApi.Infrastructure\NewsApi.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

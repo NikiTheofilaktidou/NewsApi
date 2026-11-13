@@ -32,13 +32,10 @@ public class AuthController : ControllerBase
             return Unauthorized(new { error = "Invalid credentials." });
         }
 
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
 
-        var credentials = new SigningCredentials(
-            key,
-            SecurityAlgorithms.HmacSha256);
-
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        
         var token = new JwtSecurityToken(issuer: jwtSettings["Issuer"], audience: jwtSettings["Audience"], claims:
             [
                 new Claim(ClaimTypes.Name, request.Username)

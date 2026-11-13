@@ -79,9 +79,34 @@ public class FeedApiTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal( System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
+    [Fact]
+    public async Task GetFeed_WithInvalidCategory_ReturnsBadRequest()
+    {
+        var response = await _client.GetAsync("/api/v1/feed?query=Athens&category=InvalidCategory");
+
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetFeed_WithValidCategory_ReturnsOk()
+    {
+        var response = await _client.GetAsync("/api/v1/feed?query=Athens&category=News");
+
+        Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetFeed_WithLowercaseCategory_ReturnsOk()
+    {
+        var response = await _client.GetAsync("/api/v1/feed?query=Athens&category=news");
+        Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+    }
+
     private class FakeExternalApiProvider : IExternalApiProvider
     {
         public string Name => "FakeProvider";
+
+        public IEnumerable<string> Categories => ["News"];
 
         public Task<IEnumerable<FeedItem>> FetchAsync(string query, CancellationToken cancellationToken)
         {
@@ -116,10 +141,7 @@ public class FeedApiTests : IClassFixture<WebApplicationFactory<Program>>
                 return Task.FromResult( AuthenticateResult.Fail("Invalid test token."));
             }
 
-            var claims = new[]
-            {
-        new Claim(ClaimTypes.Name, "TestUser")
-    };
+            var claims = new[] { new Claim(ClaimTypes.Name, "TestUser") };
 
             var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);

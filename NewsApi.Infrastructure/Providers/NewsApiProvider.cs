@@ -16,6 +16,7 @@ namespace NewsApi.Infrastructure.Providers
             _options = options.Value;
         }
         public string Name => "NewsApi";
+        public IEnumerable<string> Categories => ["News"];
 
         public async Task<IEnumerable<FeedItem>> FetchAsync(string query, CancellationToken cancellationToken)
         {

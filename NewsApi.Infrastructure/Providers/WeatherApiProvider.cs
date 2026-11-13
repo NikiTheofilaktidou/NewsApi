@@ -17,6 +17,7 @@ namespace NewsApi.Infrastructure.Providers
             _options = options.Value;
         }
         public string Name => "OpenWeatherMap";
+        public IEnumerable<string> Categories => ["Weather"];
 
         public async Task<IEnumerable<FeedItem>> FetchAsync(string query, CancellationToken cancellationToken)
         {

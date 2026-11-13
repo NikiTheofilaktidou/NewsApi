@@ -20,6 +20,8 @@ public class GNewsProvider : IExternalApiProvider
 
     public string Name => "GNews";
 
+    public IEnumerable<string> Categories => ["News"];
+
     public async Task<IEnumerable<FeedItem>> FetchAsync(string query, CancellationToken cancellationToken)
     {
         var url = new Uri( new Uri(_options.BaseUrl), $"search?q={Uri.EscapeDataString(query)}" + $"&lang=en&max=10&apikey={Uri.EscapeDataString(_options.ApiKey)}");

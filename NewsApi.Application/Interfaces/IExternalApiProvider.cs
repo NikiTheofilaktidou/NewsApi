@@ -6,5 +6,7 @@ namespace NewsApi.Application.Interfaces
     {
         string Name { get; }
         Task<IEnumerable<FeedItem>> FetchAsync (string query, CancellationToken cancellationToken);
+
+        IEnumerable<string> Categories { get; }
     }
 }

@@ -23,9 +23,15 @@ namespace NewsApi.Application.Services
         public async Task<IEnumerable<FeedItem>> GetFeedAsync(FeedRequest request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(request.Query))
-            {
                 throw new ArgumentException("Query cannot be empty.", nameof(request.Query));
-            }
+
+            var validCategories = _providers.SelectMany(provider => provider.Categories).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+            if (!string.IsNullOrWhiteSpace(request.Category) && !validCategories.Contains(request.Category, StringComparer.OrdinalIgnoreCase))
+                throw new ArgumentException($"Invalid category. Supported categories: {string.Join(", ", validCategories)}.");
+
+            var validSortOptions = new[] { "title", "date" };
+            if (!string.IsNullOrWhiteSpace(request.SortBy) && !validSortOptions.Contains(request.SortBy, StringComparer.OrdinalIgnoreCase)) 
+                throw new ArgumentException($"Invalid sortBy parameter. Allowed values: {string.Join(", ", validSortOptions)}.");
 
             // Caching 
             var cacheKey = $"feed:{request.Query}:{request.Category}:{request.SortBy}:{request.Descending}";
@@ -40,7 +46,7 @@ namespace NewsApi.Application.Services
             var feedItems = results.SelectMany(result => result);
 
             // Filter by category if specified
-            if (!string.IsNullOrEmpty(request.Category))
+            if (!string.IsNullOrWhiteSpace(request.Category))
             {
                 feedItems = feedItems.Where(item => item.Category.Equals(request.Category, StringComparison.OrdinalIgnoreCase));
             }
@@ -53,14 +59,15 @@ namespace NewsApi.Application.Services
             };
 
             var finalItems = feedItems.ToList();
-
-            _cache.Set(cacheKey, finalItems, TimeSpan.FromMinutes(2));
+            string? timeSpanValue = Environment.GetEnvironmentVariable("CacheCfg");
+            int timeSpan = int.TryParse(timeSpanValue, out var minutes) ? minutes : 2;
+            _cache.Set(cacheKey, finalItems, TimeSpan.FromMinutes(timeSpan));
 
             return finalItems;
         }
 
 
-        private async Task<IEnumerable<FeedItem>> FetchSafelyAsync(IExternalApiProvider provider,FeedRequest request,CancellationToken cancellationToken)
+        private async Task<IEnumerable<FeedItem>> FetchSafelyAsync(IExternalApiProvider provider, FeedRequest request, CancellationToken cancellationToken)
         {
             var stopwatch = Stopwatch.StartNew();
 
@@ -70,7 +77,7 @@ namespace NewsApi.Application.Services
 
                 stopwatch.Stop();
 
-                _statistics.RecordSuccess( provider.Name, stopwatch.Elapsed.TotalMilliseconds);
+                _statistics.RecordSuccess(provider.Name, stopwatch.Elapsed.TotalMilliseconds);
 
                 return result;
             }
@@ -83,13 +90,13 @@ namespace NewsApi.Application.Services
             {
                 stopwatch.Stop();
 
-                _statistics.RecordFailure(provider.Name,stopwatch.Elapsed.TotalMilliseconds);
+                _statistics.RecordFailure(provider.Name, stopwatch.Elapsed.TotalMilliseconds);
 
                 if (stopwatch.Elapsed.TotalSeconds > 5)
                 {
-                    _logger.LogWarning("Anomaly detected: {ProviderName} took {ElapsedMs} ms to respond.", provider.Name,stopwatch.Elapsed.TotalMilliseconds);
+                    _logger.LogWarning("Anomaly detected: {ProviderName} took {ElapsedMs} ms to respond.", provider.Name, stopwatch.Elapsed.TotalMilliseconds);
                 }
-                _logger.LogError(ex,"{ProviderName} provider failed.", provider.Name);
+                _logger.LogError(ex, "{ProviderName} provider failed.", provider.Name);
 
                 return Enumerable.Empty<FeedItem>();
             }
