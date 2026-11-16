@@ -1,4 +1,6 @@
-﻿using NewsApi.Application.Services;
+﻿using Microsoft.Extensions.Options;
+using NewsApi.Application.Configuration;
+using NewsApi.Application.Services;
 
 namespace NewsApi.UnitTests;
 
@@ -8,8 +10,7 @@ public class ProviderStatisticsServiceTests
     public void RecordSuccess_ShouldIncrementSuccessfulRequests()
     {
         // Arrange
-        var service = new ProviderStatisticsService();
-
+        var service = new ProviderStatisticsService(Options.Create(new FeedOptions()));
         // Act
         service.RecordSuccess("GNews", 100);
 
@@ -25,8 +26,7 @@ public class ProviderStatisticsServiceTests
     public void RecordFailure_ShouldIncrementFailedRequests()
     {
         // Arrange
-        var service = new ProviderStatisticsService();
-
+        var service = new ProviderStatisticsService(Options.Create(new FeedOptions()));
         // Act
         service.RecordFailure("GNews", 200);
 
@@ -42,8 +42,7 @@ public class ProviderStatisticsServiceTests
     public void RecordRequests_ShouldCalculateAverageResponseTime()
     {
         // Arrange
-        var service = new ProviderStatisticsService();
-
+        var service = new ProviderStatisticsService(Options.Create(new FeedOptions()));
         // Act
         service.RecordSuccess("GNews", 100);
         service.RecordSuccess("GNews", 200);
@@ -58,8 +57,7 @@ public class ProviderStatisticsServiceTests
     public void RecordRequestsConcurrently_ShouldPreserveAllCounts()
     {
         // Arrange
-        var service = new ProviderStatisticsService();
-
+        var service = new ProviderStatisticsService(Options.Create(new FeedOptions()));
         // Act
         Parallel.For(0, 1000, _ =>
         {
@@ -77,8 +75,7 @@ public class ProviderStatisticsServiceTests
     [Fact]
     public void RecordSuccess_ShouldCountFastRequests()
     {
-        var service = new ProviderStatisticsService();
-
+        var service = new ProviderStatisticsService(Options.Create(new FeedOptions()));
         service.RecordSuccess("GNews", 50);
 
         var stats = service.GetAll()["GNews"];
@@ -91,8 +88,7 @@ public class ProviderStatisticsServiceTests
     [Fact]
     public void RecordSuccess_ShouldCountAverageRequests()
     {
-        var service = new ProviderStatisticsService();
-
+        var service = new ProviderStatisticsService(Options.Create(new FeedOptions()));
         service.RecordSuccess("GNews", 150);
 
         var stats = service.GetAll()["GNews"];
@@ -105,8 +101,7 @@ public class ProviderStatisticsServiceTests
     [Fact]
     public void RecordSuccess_ShouldCountSlowRequests()
     {
-        var service = new ProviderStatisticsService();
-
+        var service = new ProviderStatisticsService(Options.Create(new FeedOptions()));
         service.RecordSuccess("GNews", 250);
 
         var stats = service.GetAll()["GNews"];

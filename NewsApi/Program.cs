@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using NewsApi.Application.Configuration;
 using NewsApi.Application.Interfaces;
 using NewsApi.Application.Services;
 using NewsApi.Infrastructure.Configuration;
 using NewsApi.Infrastructure.Providers;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,7 @@ builder.Services.AddOpenApi();
 builder.Services.Configure<NewsApiOptions>(builder.Configuration.GetSection("NewsApi"));
 builder.Services.Configure<WeatherApiOptions>(builder.Configuration.GetSection("WeatherApi"));
 builder.Services.Configure<GNewsOptions>(builder.Configuration.GetSection("GNews"));
+builder.Services.Configure<FeedOptions>(builder.Configuration.GetSection("FeedOptions"));
 builder.Services.AddHttpClient<NewsApiProvider>(); 
 builder.Services.AddHttpClient<WeatherApiProvider>();
 builder.Services.AddHttpClient<GNewsProvider>();

@@ -1,7 +1,9 @@
 ﻿
-using System.Collections.Concurrent;
+using Microsoft.Extensions.Options;
+using NewsApi.Application.Configuration;
 using NewsApi.Application.Interfaces;
 using NewsApi.Application.Models;
+using System.Collections.Concurrent;
 
 namespace NewsApi.Application.Services;
 
@@ -9,6 +11,12 @@ public class ProviderStatisticsService : IProviderStatisticsService
 {
     private readonly ConcurrentDictionary<string, ProviderStatistics> _statistics = new();
     private readonly ConcurrentDictionary<string, ConcurrentQueue<(DateTime Timestamp, double ElapsedMs)>> _recentSamples = new();
+    private readonly FeedOptions _options;
+
+    public ProviderStatisticsService(IOptions<FeedOptions> options)
+    {
+        _options = options.Value;
+    }
     public void RecordSuccess(string providerName, double elapsedMilliseconds)
     {
         UpdateStatistics(providerName, elapsedMilliseconds, true);
@@ -38,16 +46,16 @@ public class ProviderStatisticsService : IProviderStatisticsService
                     SuccessfulRequests = current.SuccessfulRequests + (succeeded ? 1 : 0),
                     FailedRequests = current.FailedRequests + (succeeded ? 0 : 1),
                     AverageResponseTimeMs = averageResponseTime,
-                    FastRequests = current.FastRequests + (elapsedMilliseconds < 100 ? 1 : 0),
-                    AverageRequests = current.AverageRequests + (elapsedMilliseconds >= 100 && elapsedMilliseconds <= 200 ? 1 : 0),
-                    SlowRequests = current.SlowRequests + (elapsedMilliseconds > 200 ? 1 : 0)
+                    FastRequests = current.FastRequests + (elapsedMilliseconds < _options.FastRequestTime? 1 : 0),
+                    AverageRequests = current.AverageRequests + (elapsedMilliseconds >= _options.FastRequestTime && elapsedMilliseconds <= _options.AverageRequestTime ? 1 : 0),
+                    SlowRequests = current.SlowRequests + (elapsedMilliseconds > _options.AverageRequestTime ? 1 : 0)
                 };
             });
         var samples = _recentSamples.GetOrAdd(providerName, _ => new ConcurrentQueue<(DateTime, double)>());
         samples.Enqueue((DateTime.UtcNow, elapsedMilliseconds));
     }
 
-    private static ProviderStatistics CreateStatistics(double elapsedMilliseconds, bool succeeded)
+    private ProviderStatistics CreateStatistics(double elapsedMilliseconds, bool succeeded)
     {
         return new ProviderStatistics
         {
@@ -55,9 +63,9 @@ public class ProviderStatisticsService : IProviderStatisticsService
             SuccessfulRequests = succeeded ? 1 : 0,
             FailedRequests = succeeded ? 0 : 1,
             AverageResponseTimeMs = elapsedMilliseconds,
-            FastRequests = elapsedMilliseconds < 100 ? 1 : 0,
-            AverageRequests = elapsedMilliseconds >= 100 && elapsedMilliseconds <= 200 ? 1 : 0,
-            SlowRequests = elapsedMilliseconds > 200 ? 1 : 0
+            FastRequests = elapsedMilliseconds < _options.FastRequestTime ? 1 : 0,
+            AverageRequests = elapsedMilliseconds >= _options.FastRequestTime && elapsedMilliseconds <= _options.AverageRequestTime ? 1 : 0,
+            SlowRequests = elapsedMilliseconds > _options.AverageRequestTime ? 1 : 0
         };
     }
 

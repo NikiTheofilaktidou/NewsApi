@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using NewsApi.Application.Configuration;
 using NewsApi.Application.Interfaces;
 using NewsApi.Application.Models;
 using NewsApi.Domain.Entities;
@@ -13,12 +15,14 @@ namespace NewsApi.Application.Services
         private readonly IEnumerable<IExternalApiProvider> _providers;
         private readonly IMemoryCache _cache;
         private readonly IProviderStatisticsService _statistics;
-        public FeedService(IEnumerable<IExternalApiProvider> providers, ILogger<FeedService> logger, IMemoryCache cache, IProviderStatisticsService statistics)
+        private readonly FeedOptions _options;
+        public FeedService(IEnumerable<IExternalApiProvider> providers, ILogger<FeedService> logger, IMemoryCache cache, IProviderStatisticsService statistics, IOptions<FeedOptions> options)
         {
             _providers = providers;
             _logger = logger;
             _cache = cache;
             _statistics = statistics;
+            _options = options.Value;
         }
         public async Task<IEnumerable<FeedItem>> GetFeedAsync(FeedRequest request, CancellationToken cancellationToken)
         {
@@ -59,7 +63,7 @@ namespace NewsApi.Application.Services
             };
 
             var finalItems = feedItems.ToList();
-            _cache.Set(cacheKey, finalItems, TimeSpan.FromMinutes(2));
+            _cache.Set(cacheKey, finalItems, TimeSpan.FromMinutes(_options.CachingTime));
 
             return finalItems;
         }
@@ -90,7 +94,7 @@ namespace NewsApi.Application.Services
 
                 _statistics.RecordFailure(provider.Name, stopwatch.Elapsed.TotalMilliseconds);
 
-                if (stopwatch.Elapsed.TotalSeconds > 5)
+                if (stopwatch.Elapsed.TotalSeconds > _options.SlowRequestTime)
                 {
                     _logger.LogWarning("Anomaly detected: {ProviderName} took {ElapsedMs} ms to respond.", provider.Name, stopwatch.Elapsed.TotalMilliseconds);
                 }
