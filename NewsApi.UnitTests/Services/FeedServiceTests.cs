@@ -90,9 +90,7 @@ namespace NewsApi.UnitTests.Services
             };
 
             // Act
-            var result = (await service.GetFeedAsync(
-                request,
-                CancellationToken.None)).ToList();
+            var result = (await service.GetFeedAsync(request, CancellationToken.None)).ToList();
 
             // Assert
             Assert.Equal(2, result.Count);

@@ -30,11 +30,9 @@ namespace NewsApi.Infrastructure.Providers
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorBody = await response.Content.ReadAsStringAsync(
-                    cancellationToken);
+                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
-                throw new HttpRequestException(
-                    $"{Name} returned {(int)response.StatusCode}: {errorBody}");
+                throw new HttpRequestException($"{Name} returned {(int)response.StatusCode}: {errorBody}");
             }
 
             var result = await response.Content.ReadFromJsonAsync<NewsApiResponse>(cancellationToken: cancellationToken);
@@ -46,8 +44,7 @@ namespace NewsApi.Infrastructure.Providers
 
             if (result.Status != "ok")
             {
-                throw new InvalidOperationException(
-                    $"News API error: {result.Message}");
+                throw new InvalidOperationException($"News API error: {result.Message}");
             }
 
             var articles = result.Articles ?? [];

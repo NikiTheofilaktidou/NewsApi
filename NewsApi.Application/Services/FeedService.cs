@@ -59,9 +59,7 @@ namespace NewsApi.Application.Services
             };
 
             var finalItems = feedItems.ToList();
-            string? timeSpanValue = Environment.GetEnvironmentVariable("CacheCfg");
-            int timeSpan = int.TryParse(timeSpanValue, out var minutes) ? minutes : 2;
-            _cache.Set(cacheKey, finalItems, TimeSpan.FromMinutes(timeSpan));
+            _cache.Set(cacheKey, finalItems, TimeSpan.FromMinutes(2));
 
             return finalItems;
         }
