@@ -4,6 +4,8 @@ using NewsApi.Application.Interfaces;
 using NewsApi.Application.Models;
 using NewsApi.Application.Services;
 using NewsApi.Domain.Entities;
+using Microsoft.Extensions.Options;
+using NewsApi.Application.Configuration;
 
 namespace NewsApi.UnitTests.Services
 {
@@ -13,8 +15,7 @@ namespace NewsApi.UnitTests.Services
         public async Task GetFeedAsync_EmptyQuery_ThrowsArgumentException()
         {
             // Arrange
-            var service = new FeedService(Enumerable.Empty<IExternalApiProvider>(), NullLogger<FeedService>.Instance, new MemoryCache(new MemoryCacheOptions()), new ProviderStatisticsService());
-
+            var service = CreateService();
             var request = new FeedRequest { Query = "" };
 
             //Act & Assert
@@ -28,8 +29,7 @@ namespace NewsApi.UnitTests.Services
             var provider1 = new FakeExternalApiProvider("NewsAPI", new List<FeedItem> { new() { Title = "News Item", Provider = "NewsAPI" } });
             var provider2 = new FakeExternalApiProvider("OpenWeatherMap", new List<FeedItem> { new() { Title = "Weather item", Provider = "OpenWeatherMap" } });
 
-            var service = new FeedService([provider1, provider2], NullLogger<FeedService>.Instance, new MemoryCache(new MemoryCacheOptions()), new ProviderStatisticsService());
-
+            var service = CreateService(provider1, provider2);
             var request = new FeedRequest { Query = "Athens" };
 
             // Act 
@@ -50,8 +50,7 @@ namespace NewsApi.UnitTests.Services
 
             var successfulProvider = new FakeExternalApiProvider("OpenWeatherMap", new List<FeedItem> { new() { Title = "Weather item", Provider = "OpenWeatherMap" } });
 
-            var service = new FeedService([failingProvider, successfulProvider], NullLogger<FeedService>.Instance, new MemoryCache(new MemoryCacheOptions()), new ProviderStatisticsService());
-
+            var service = CreateService(failingProvider, successfulProvider);
             var request = new FeedRequest { Query = "Athens" };
 
             // Act
@@ -80,8 +79,7 @@ namespace NewsApi.UnitTests.Services
 
             var provider = new FakeExternalApiProvider("NewsAPI", new[] { olderItem, newerItem });
 
-            var service = new FeedService(new[] { provider }, NullLogger<FeedService>.Instance, new MemoryCache(new MemoryCacheOptions()), new ProviderStatisticsService());
-
+            var service = CreateService(provider);
             var request = new FeedRequest
             {
                 Query = "Athens",
@@ -109,8 +107,7 @@ namespace NewsApi.UnitTests.Services
             new() { Title = "Social item", Category = "SocialMedia" }
                 });
 
-            var service = new FeedService(new[] { provider }, NullLogger<FeedService>.Instance, new MemoryCache(new MemoryCacheOptions()), new ProviderStatisticsService());
-
+            var service = CreateService(provider);
             var request = new FeedRequest
             {
                 Query = "Athens",
@@ -143,7 +140,7 @@ namespace NewsApi.UnitTests.Services
 
             var provider = new FakeExternalApiProvider("NewsAPI", new[] { newerItem, olderItem });
 
-            var service = new FeedService(new[] { provider }, NullLogger<FeedService>.Instance, new MemoryCache(new MemoryCacheOptions()), new ProviderStatisticsService());
+            var service = CreateService(provider);
 
             var request = new FeedRequest
             {
@@ -172,7 +169,7 @@ namespace NewsApi.UnitTests.Services
             new() { Title = "News" }
                 });
 
-            var service = new FeedService(new[] { provider }, NullLogger<FeedService>.Instance, new MemoryCache(new MemoryCacheOptions()), new ProviderStatisticsService());
+            var service = CreateService(provider);
 
             var request = new FeedRequest
             {
@@ -203,7 +200,7 @@ namespace NewsApi.UnitTests.Services
             }
                 ]);
 
-            var service = new FeedService([provider],NullLogger<FeedService>.Instance, new MemoryCache(new MemoryCacheOptions()), new ProviderStatisticsService());
+            var service = CreateService(provider);
 
             var request = new FeedRequest
             {
@@ -246,6 +243,13 @@ namespace NewsApi.UnitTests.Services
 
                 return Task.FromResult(_feedItems);
             }
+        }
+
+        private static FeedService CreateService(params IExternalApiProvider[] providers)
+        {
+            var options = Options.Create(new FeedOptions());
+
+            return new FeedService(providers, NullLogger<FeedService>.Instance, new MemoryCache(new MemoryCacheOptions()), new ProviderStatisticsService(options), options);
         }
     }
 }
