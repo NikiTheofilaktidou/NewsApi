@@ -3,7 +3,9 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using NewsApi.Configuration;
 
 namespace NewsApi.Controllers;
 
@@ -12,10 +14,12 @@ namespace NewsApi.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IConfiguration _configuration;
+    private readonly JwtOptions _options;
 
-    public AuthController(IConfiguration configuration)
+    public AuthController(IConfiguration configuration, IOptions<JwtOptions> options)
     {
         _configuration = configuration;
+        _options = options.Value;
     }
 
     [AllowAnonymous]
@@ -40,12 +44,14 @@ public class AuthController : ControllerBase
             [
                 new Claim(ClaimTypes.Name, request.Username)
             ],
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: DateTime.UtcNow.AddMinutes(_options.TokenExpiration),
             signingCredentials: credentials);
 
         return Ok(new
         {
-            accessToken = new JwtSecurityTokenHandler().WriteToken(token)
+            accessToken = new JwtSecurityTokenHandler().WriteToken(token),
+            tokenType = "Bearer",
+            expiresIn = _options.TokenExpiration + " minutes"
         });
     }
 
